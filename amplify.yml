@@ -25,7 +25,7 @@ frontend:
         - echo "StripePublicKey=${STRIPE_PUBLIC_KEY}" > .prod.env
         - echo "PaymentChargeUrl=${PAYMENT_CHARGE_URL}" >> .prod.env
         - cat .prod.env
-        - nvm use 16
+        - export NODE_OPTIONS=--openssl-legacy-provider
         - yarn
     build:
       commands:
