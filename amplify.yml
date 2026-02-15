@@ -10,23 +10,17 @@ frontend:
         - export APPSYNC_API_ID=$(aws ssm get-parameter --name /archive/service/amplify/api/id --query 'Parameter.Value' --output text --region us-east-1)
         - export APPSYNC_API_KEY=$(aws appsync list-api-keys --api-id $APPSYNC_API_ID --query 'apiKeys[0].id' --output text --region us-east-1)
         - export PAYMENT_CHARGE_URL=$(aws ssm get-parameter --name /archive/service/payment/api/charge/url --query 'Parameter.Value' --output text --region us-east-1)
-        - >
-          python3 -c "
-          import json, os;
-          config = {
-            'aws_project_region': 'us-east-1',
-            'aws_cognito_region': 'us-east-1',
-            'aws_user_pools_id': os.environ['COGNITO_USER_POOL_ID'],
-            'aws_user_pools_web_client_id': os.environ['COGNITO_CLIENT_ID'],
-            'aws_appsync_graphqlEndpoint': os.environ['APPSYNC_URL'],
-            'aws_appsync_region': 'us-east-1',
-            'aws_appsync_authenticationType': 'AMAZON_COGNITO_USER_POOLS',
-            'aws_appsync_apiKey': os.environ['APPSYNC_API_KEY']
-          };
-          f = open('aws-exports.js', 'w');
-          f.write('const awsmobile = ' + json.dumps(config, indent=2) + ';\nexport default awsmobile;\n');
-          f.close()
-          "
+        - echo "const awsmobile = {" > aws-exports.js
+        - echo "  \"aws_project_region\":\"us-east-1\"," >> aws-exports.js
+        - echo "  \"aws_cognito_region\":\"us-east-1\"," >> aws-exports.js
+        - echo "  \"aws_user_pools_id\":\"${COGNITO_USER_POOL_ID}\"," >> aws-exports.js
+        - echo "  \"aws_user_pools_web_client_id\":\"${COGNITO_CLIENT_ID}\"," >> aws-exports.js
+        - echo "  \"aws_appsync_graphqlEndpoint\":\"${APPSYNC_URL}\"," >> aws-exports.js
+        - echo "  \"aws_appsync_region\":\"us-east-1\"," >> aws-exports.js
+        - echo "  \"aws_appsync_authenticationType\":\"AMAZON_COGNITO_USER_POOLS\"," >> aws-exports.js
+        - echo "  \"aws_appsync_apiKey\":\"${APPSYNC_API_KEY}\"" >> aws-exports.js
+        - echo "};" >> aws-exports.js
+        - echo "export default awsmobile;" >> aws-exports.js
         - cat aws-exports.js
         - echo "StripePublicKey=${STRIPE_PUBLIC_KEY}" > .prod.env
         - echo "PaymentChargeUrl=${PAYMENT_CHARGE_URL}" >> .prod.env
